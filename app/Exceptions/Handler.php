@@ -3,6 +3,7 @@
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Auth\AuthenticationException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -38,13 +39,29 @@ class Handler extends ExceptionHandler
 
     /**
      * Register the exception handling callbacks for the application.
-     *
-     * @return void
      */
-    public function register()
+    public function register(): void
     {
         $this->reportable(function (Throwable $e) {
             //
         });
+    }
+
+    /**
+     * Convert an authentication exception into a response.
+     * هذه الدالة مهمة جداً للـ API
+     */
+    protected function unauthenticated($request, AuthenticationException $exception)
+    {
+        // إذا كان الطلب من API، أرجع JSON بدلاً من redirect
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json([
+                'message' => 'Unauthenticated.',
+                'error' => 'You must be logged in to access this resource.'
+            ], 401);
+        }
+
+        // للطلبات العادية (Web)
+        return redirect()->guest(route('login'));
     }
 }
