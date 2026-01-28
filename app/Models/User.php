@@ -22,6 +22,16 @@ class User extends Authenticatable
         'email',
         'password',
     ];
+    // A user can have many tasks assigned to them
+    public function tasks()
+    {
+        return $this->hasMany(Task::class);
+    }
+    // A user can create many tasks
+    public function createdTasks()
+    {
+        return $this->hasMany(Task::class, 'created_by');
+    }
 
     /**
      * The attributes that should be hidden for serialization.
